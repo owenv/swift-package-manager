@@ -23,6 +23,8 @@ if let deploymentTarget = ProcessInfo.processInfo.environment["SWIFTPM_MACOS_DEP
     macOSPlatform = .macOS(.v10_15)
 }
 
+let buildPackageSyntax = ProcessInfo.processInfo.environment["SPM_BUILD_PACKAGE_SYNTAX"] != nil
+
 let package = Package(
     name: "SwiftPM",
     platforms: [macOSPlatform],
@@ -47,7 +49,7 @@ let package = Package(
                 "Build",
                 "Xcodeproj",
                 "Workspace"
-            ]
+          ] + (buildPackageSyntax ? ["PackageSyntax"] : [])
         ),
         .library(
             name: "SwiftPM-auto",
@@ -63,7 +65,7 @@ let package = Package(
                 "Build",
                 "Xcodeproj",
                 "Workspace"
-            ]
+            ] + (buildPackageSyntax ? ["PackageSyntax"] : [])
         ),
         .library(
             name: "SwiftPMDataModel",
@@ -211,7 +213,8 @@ let package = Package(
         .target(
             /** High-level commands */
             name: "Commands",
-            dependencies: ["SwiftToolsSupport-auto", "Basics", "Build", "PackageGraph", "SourceControl", "Xcodeproj", "Workspace", "XCBuildSupport", "ArgumentParser", "PackageCollections"]),
+            dependencies: ["SwiftToolsSupport-auto", "Basics", "Build", "PackageGraph", "SourceControl", "Xcodeproj", "Workspace", "XCBuildSupport", "ArgumentParser", "PackageCollections"] + (buildPackageSyntax ? ["PackageSyntax"] : []),
+            swiftSettings: buildPackageSyntax ? [.define("BUILD_PACKAGE_SYNTAX")] : nil),
         .target(
             /** The main executable provided by SwiftPM */
             name: "swift-package",
@@ -257,7 +260,8 @@ let package = Package(
             dependencies: ["Build", "SPMTestSupport"]),
         .testTarget(
             name: "CommandsTests",
-            dependencies: ["swift-build", "swift-package", "swift-test", "swift-run", "Commands", "Workspace", "SPMTestSupport"]),
+            dependencies: ["swift-build", "swift-package", "swift-test", "swift-run", "Commands", "Workspace", "SPMTestSupport"],
+            swiftSettings: buildPackageSyntax ? [.define("BUILD_PACKAGE_SYNTAX")] : nil),
         .testTarget(
             name: "WorkspaceTests",
             dependencies: ["Workspace", "SPMTestSupport"]),
@@ -362,4 +366,17 @@ if ProcessInfo.processInfo.environment["SWIFTCI_USE_LOCAL_DEPS"] == nil {
         .package(path: "../swift-driver"),
         .package(path: "../swift-crypto"),
     ]
+}
+
+// Because SwiftSyntax is closely tied to the compiler, only build it if 'SPM_BUILD_PACKAGE_SYNTAX'
+// is set. Package syntax support can only be built alongside a matching SwiftSyntax
+// and compiler toolchain, so only a path-based dependency is supported.
+if buildPackageSyntax {
+    package.dependencies += [.package(path: "../swift-syntax")]
+    package.targets += [
+      .target(name: "PackageSyntax",
+              dependencies: ["Workspace", "PackageModel", "PackageLoading",
+                             "SourceControl", "SwiftSyntax", "SwiftToolsSupport-auto"]),
+      .testTarget(name: "PackageSyntaxTests", dependencies: ["PackageSyntax", "SPMTestSupport", "SwiftSyntax"]),
+  ]
 }
