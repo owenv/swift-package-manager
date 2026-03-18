@@ -11,10 +11,17 @@
 //===----------------------------------------------------------------------===//
 
 import Basics
-import RegexBuilder
+import Foundation
 
 package struct LLVMObjdumpSymbolProvider: SymbolProvider {
     private let objdumpPath: AbsolutePath
+
+    // NSRegularExpression equivalent of the original RegexBuilder pattern, avoiding
+    // a dependency on _StringProcessing which may not be linkable in bootstrap CMake
+    // builds on Windows. Groups: 1=visibility, 2=weak, 3=section, 4=name.
+    private static let symbolLineRegex = try! NSRegularExpression(
+        pattern: #"^[0-9a-fA-F]{16}[ \t]([lgu! ])([ w])[C ][W ][Ii ][Dd ][FfO ][ \t]+(\S*).*[ \t](\S+)$"#
+    )
 
     package init(objdumpPath: AbsolutePath) {
         self.objdumpPath = objdumpPath
@@ -33,89 +40,33 @@ package struct LLVMObjdumpSymbolProvider: SymbolProvider {
     }
 
     package func parse(output: String, symbols: inout ReferencedSymbols, recordUndefined: Bool = true) throws {
-        let visibility = Reference<Substring>()
-        let weakLinkage = Reference<Substring>()
-        let section = Reference<Substring>()
-        let name = Reference<Substring>()
-        let symbolLineRegex = Regex {
-            Anchor.startOfLine
-            Repeat(CharacterClass.hexDigit, count: 16) // The address of the symbol
-            CharacterClass.whitespace
-            Capture(as: visibility) {
-                ChoiceOf {
-                    "l"
-                    "g"
-                    "u"
-                    "!"
-                    " "
-                }
-            }
-            Capture(as: weakLinkage) { // Whether the symbol is weak or strong
-                ChoiceOf {
-                    "w"
-                    " "
-                }
-            }
-            ChoiceOf {
-                "C"
-                " "
-            }
-            ChoiceOf {
-                "W"
-                " "
-            }
-            ChoiceOf {
-                "I"
-                "i"
-                " "
-            }
-            ChoiceOf {
-                "D"
-                "d"
-                " "
-            }
-            ChoiceOf {
-                "F"
-                "f"
-                "O"
-                " "
-            }
-            OneOrMore{
-                .whitespace
-            }
-            Capture(as: section) { // The section the symbol appears in
-                ZeroOrMore {
-                    .whitespace.inverted
-                }
-            }
-            ZeroOrMore {
-                .anyNonNewline
-            }
-            CharacterClass.whitespace
-            Capture(as: name) { // The name of symbol
-                OneOrMore {
-                    .whitespace.inverted
-                }
-            }
-            Anchor.endOfLine
-        }
         for line in output.split(whereSeparator: \.isNewline) {
-            guard let match = try symbolLineRegex.wholeMatch(in: line) else {
+            let lineString = String(line)
+            let range = NSRange(lineString.startIndex..., in: lineString)
+            guard let match = Self.symbolLineRegex.firstMatch(in: lineString, range: range),
+                  match.numberOfRanges >= 5,
+                  let weakRange = Range(match.range(at: 2), in: lineString),
+                  let sectionRange = Range(match.range(at: 3), in: lineString),
+                  let nameRange = Range(match.range(at: 4), in: lineString) else {
                 // This isn't a symbol definition line
                 continue
             }
 
-            switch match[section] {
+            let weakLinkage = lineString[weakRange]
+            let section = String(lineString[sectionRange])
+            let name = String(lineString[nameRange])
+
+            switch section {
             case "*UND*":
                 guard recordUndefined else {
                     continue
                 }
                 // Weak symbols are optional
-                if match[weakLinkage] != "w" {
-                    symbols.addUndefined(String(match[name]))
+                if weakLinkage != "w" {
+                    symbols.addUndefined(name)
                 }
             default:
-                symbols.addDefined(String(match[name]))
+                symbols.addDefined(name)
             }
         }
     }

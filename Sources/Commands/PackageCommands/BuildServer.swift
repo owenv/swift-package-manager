@@ -40,6 +40,14 @@ struct BuildServer: AsyncSwiftCommand {
         let realStdout = try FileDescriptor.standardOutput.duplicate()
         _ = try FileDescriptor.standardError.duplicate(as: FileDescriptor.standardOutput)
 
+        // After the dup2 above, print() now goes to stderr. Use this for diagnostics.
+        func debugLog(_ message: String) {
+            fputs("[experimental-build-server] \(message)\n", stderr)
+        }
+
+        debugLog("argv: \(CommandLine.arguments)")
+        debugLog("parsed buildSystem option: \(swiftCommandState.options.build.buildSystem)")
+
         let realStdoutHandle = FileHandle(fileDescriptor: realStdout.rawValue, closeOnDealloc: false)
 
         let clientConnection = JSONRPCConnection(
@@ -51,7 +59,10 @@ struct BuildServer: AsyncSwiftCommand {
             sendMirrorFile: nil
         )
 
-        guard let buildSystem = try await swiftCommandState.createBuildSystem() as? SwiftBuildSystem else {
+        let createdBuildSystem = try await swiftCommandState.createBuildSystem()
+        debugLog("createBuildSystem() returned type: \(type(of: createdBuildSystem))")
+        guard let buildSystem = createdBuildSystem as? SwiftBuildSystem else {
+            debugLog("cast to SwiftBuildSystem failed — dynamic type is \(type(of: createdBuildSystem))")
             throw ArgumentParser.ValidationError("Build server requires --build-system swiftbuild")
         }
 

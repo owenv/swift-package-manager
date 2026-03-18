@@ -276,22 +276,22 @@ public final class UserToolchain: Toolchain {
             return nil
         }
 
-        // Extract the swift version using regex from the description if available
-        do {
-            let regex = try Regex(#"\((swift(lang)?-[^ )]*)"#)
-            if let match = try regex.firstMatch(in: compilerVersion), match.count > 1, let substring = match[1].substring {
-                return String(substring)
-            }
-
-            let regex2 = try Regex(#"\(.*Swift (.*)[ )]"#)
-            if let match2 = try regex2.firstMatch(in: compilerVersion), match2.count > 1, let substring = match2[1].substring {
-                return "swift-\(substring)"
-            } else {
-                return nil
-            }
-        } catch {
-            return nil
+        // Extract the swift version using NSRegularExpression to avoid a dependency on
+        // _StringProcessing, which may not be linkable in bootstrap CMake builds on Windows.
+        let nsRange = NSRange(compilerVersion.startIndex..., in: compilerVersion)
+        if let re = try? NSRegularExpression(pattern: #"\((swift(lang)?-[^ )]*)"#),
+           let m = re.firstMatch(in: compilerVersion, range: nsRange),
+           m.numberOfRanges > 1,
+           let r = Range(m.range(at: 1), in: compilerVersion) {
+            return String(compilerVersion[r])
         }
+        if let re2 = try? NSRegularExpression(pattern: #"\(.*Swift (.*)[ )]"#),
+           let m2 = re2.firstMatch(in: compilerVersion, range: nsRange),
+           m2.numberOfRanges > 1,
+           let r2 = Range(m2.range(at: 1), in: compilerVersion) {
+            return "swift-\(String(compilerVersion[r2]))"
+        }
+        return nil
     }
 
     // MARK: - public API

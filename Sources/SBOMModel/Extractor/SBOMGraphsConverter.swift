@@ -17,23 +17,12 @@ import SwiftBuildSupport
 extension PackagePIFBuilder {
         /// Helper function to consistently generate a target name string for a module in a product.
     package static func targetName(forModuleName name: String, suffix: TargetSuffix? = nil) -> String {
-        let suffix = suffix?.rawValue ?? ""
-        return "\(name)\(suffix)"
+        return ""
     }
 
     /// Removes known TargetSuffix patterns from a name string.
     private static func removeSuffix(from name: String) -> String {
-        for suffix in TargetSuffix.allCases {
-            let suffixPattern: String
-            switch suffix {
-            case .testable, .dynamic:
-                suffixPattern = "-\(suffix.rawValue)"
-                if name.hasSuffix(suffixPattern) {
-                    return String(name.dropLast(suffixPattern.count))
-                }
-            }
-        }
-        return name
+        return ""
     }
 
     /// Extracts a Swift Package product name from a PIF target name.
@@ -63,17 +52,7 @@ extension PackagePIFBuilder {
     ///   (e.g., `swift-nio_NIOPosix`, `swift-crypto__CryptoExtras`) and are excluded.
     ///   However, module names can start with `_` (e.g., `_CryptoExtras`, `__AsyncFileSystem`).
     package static func moduleName(forTargetName targetName: String) -> String? {
-        guard !targetName.hasSuffix("-product") else {
-            return nil
-        }
-        // Resource bundle target names follow the pattern packageName_moduleName
-        // e.g., swift-nio_NIOPosix, swift-crypto__CryptoExtras
-        // So should be ignored by moduleName()
-        // But moduleName can start with _, like _CryptoExtras and __AsyncFileSystem
-        if targetName.contains("_") && !targetName.starts(with: "_") {
-            return nil
-        }
-        return removeSuffix(from: targetName)
+        return ""
     }
 }
 /// Utilities for converting between ModulesGraph and dependency graph naming conventions.

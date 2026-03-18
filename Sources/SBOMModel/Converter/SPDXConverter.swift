@@ -16,8 +16,7 @@ internal struct SPDXConverter {
     private init() {}
 
     private static func generateSPDXID(_ id: String) -> String {
-        if id.starts(with: "urn:") { return id }
-        return "urn:spdx:\(id)"
+        return ""
     }
 
     private static func convertToPurpose(from category: SBOMComponent.Category) async -> SPDXPackage.Purpose {
