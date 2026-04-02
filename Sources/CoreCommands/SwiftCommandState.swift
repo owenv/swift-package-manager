@@ -405,15 +405,20 @@ public final class SwiftCommandState {
                 warning: "`--experimental-swift-sdks-path` is deprecated and will be removed in a future version of SwiftPM. Use `--swift-sdks-path` instead."
             )
         }
-        
+
+        print("SWIFTPM IS COMPUTING SWIFTPM RESOURCE DIR")
         if let packageManagerResourcesDirectory = options.locations.packageManagerResourcesDirectory {
+            print("WAS OVERRIDDEN to \(packageManagerResourcesDirectory)")
             self.packageManagerResourcesDirectory = packageManagerResourcesDirectory
         } else if let cwd = localFileSystem.currentWorkingDirectory {
+            print("HAD CWD \(cwd)")
             self.packageManagerResourcesDirectory = try? AbsolutePath(validating: CommandLine.arguments[0], relativeTo: cwd)
                 .parentDirectory.parentDirectory.appending(components: ["share", "pm"])
+            print("COMPUTED \(self.packageManagerResourcesDirectory)")
         } else {
             self.packageManagerResourcesDirectory = try? AbsolutePath(validating: CommandLine.arguments[0])
                 .parentDirectory.parentDirectory.appending(components: ["share", "pm"])
+            print("COMPUTED \(self.packageManagerResourcesDirectory)")
         }
         
         self.sharedSwiftSDKsDirectory = try fileSystem.getSharedSwiftSDKsDirectory(
