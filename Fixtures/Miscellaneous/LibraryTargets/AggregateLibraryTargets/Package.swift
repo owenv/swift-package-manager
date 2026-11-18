@@ -8,23 +8,23 @@ let package = Package(
     ],
     targets: [
         .target(name: "StaticMember"),
-        .libraryTarget(
+        .library(
             name: "StaticAggregate",
             type: .static,
             dependencies: ["StaticMember"]
         ),
         .target(name: "DynamicMember"),
-        .libraryTarget(
+        .library(
             name: "DynamicAggregate",
             type: .dynamic,
             dependencies: ["DynamicMember"]
         ),
         .target(name: "AutoMember"),
-        .libraryTarget(
+        .library(
             name: "AutoAggregate",
             dependencies: ["AutoMember"]
         ),
-        .executableTarget(
+        .executable(
             name: "Tool",
             dependencies: ["StaticAggregate", "DynamicAggregate", "AutoAggregate"]
         ),

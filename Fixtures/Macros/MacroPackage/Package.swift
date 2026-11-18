@@ -15,6 +15,6 @@ let package = Package(
 	targets: [
 		.macro(name: "MacroImpl"),
 		.target(name: "MacroDef", dependencies: ["MacroImpl"], swiftSettings: settings),
-		.executableTarget(name: "MacroClient", dependencies: ["MacroDef"], swiftSettings: settings),
+		.executable(name: "MacroClient", dependencies: ["MacroDef"], swiftSettings: settings),
 	]
 )

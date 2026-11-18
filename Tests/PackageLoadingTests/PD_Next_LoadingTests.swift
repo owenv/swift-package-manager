@@ -184,4 +184,89 @@ final class PackageDescriptionNextLoadingTests: PackageDescriptionLoadingTests {
             result.check(diagnostic: "unknown package 'foo1' in dependencies of target 'Target1'; valid packages are: 'foo' (from 'http://scm.com/org/foo'), 'bar' (from 'http://scm.com/org/bar')", severity: .error)
         }
     }
+
+    func testTargetFactoriesWithoutTargetSuffix() async throws {
+        let content = """
+            import PackageDescription
+            let package = Package(
+                name: "Foo",
+                targets: [
+                    .target(name: "Regular"),
+                    .library(name: "Lib", type: .static, dependencies: ["Regular"], visibility: .public),
+                    .executable(name: "Exe", dependencies: ["Lib"]),
+                    .test(name: "LibTests", dependencies: ["Lib"]),
+                    .binary(name: "LocalBinary", path: "Local.xcframework"),
+                    .binary(name: "RemoteBinary", url: "https://example.com/Remote.zip", checksum: "abc"),
+                ]
+            )
+            """
+
+        let observability = ObservabilitySystem.makeForTesting()
+        let (manifest, validationDiagnostics) = try await loadAndValidateManifest(content, observabilityScope: observability.topScope)
+        XCTAssertNoDiagnostics(observability.diagnostics)
+        XCTAssertNoDiagnostics(validationDiagnostics)
+
+        let targets = Dictionary(uniqueKeysWithValues: manifest.targets.map { ($0.name, $0) })
+        XCTAssertEqual(targets["Regular"]?.type, .regular)
+        XCTAssertEqual(targets["Lib"]?.type, .library(.static))
+        XCTAssertEqual(targets["Lib"]?.visibility, .public)
+        XCTAssertEqual(targets["Exe"]?.type, .executable)
+        XCTAssertEqual(targets["LibTests"]?.type, .test)
+        XCTAssertEqual(targets["LocalBinary"]?.type, .binary)
+        XCTAssertEqual(targets["LocalBinary"]?.path, "Local.xcframework")
+        XCTAssertEqual(targets["RemoteBinary"]?.type, .binary)
+        XCTAssertEqual(targets["RemoteBinary"]?.url, "https://example.com/Remote.zip")
+        XCTAssertEqual(targets["RemoteBinary"]?.checksum, "abc")
+    }
+
+    func testDeprecatedTargetSuffixedFactories() async throws {
+        let content = """
+            import PackageDescription
+            let package = Package(
+                name: "Foo",
+                targets: [
+                    .executableTarget(name: "Exe"),
+                    .testTarget(name: "ExeTests", dependencies: ["Exe"]),
+                    .binaryTarget(name: "LocalBinary", path: "Local.xcframework"),
+                    .binaryTarget(name: "RemoteBinary", url: "https://example.com/Remote.zip", checksum: "abc"),
+                ]
+            )
+            """
+
+        let observability = ObservabilitySystem.makeForTesting()
+        let (manifest, _) = try await loadAndValidateManifest(content, observabilityScope: observability.topScope)
+
+        let targets = Dictionary(uniqueKeysWithValues: manifest.targets.map { ($0.name, $0) })
+        XCTAssertEqual(targets["Exe"]?.type, .executable)
+        XCTAssertEqual(targets["ExeTests"]?.type, .test)
+        XCTAssertEqual(targets["LocalBinary"]?.type, .binary)
+        XCTAssertEqual(targets["RemoteBinary"]?.type, .binary)
+
+        let warnings = observability.diagnostics.filter { $0.severity == .warning }.map(\.message).joined(separator: "\n")
+        XCTAssertMatch(warnings, .contains("'executableTarget(name:"))
+        XCTAssertMatch(warnings, .contains("renamed to 'executable'"))
+        XCTAssertMatch(warnings, .contains("renamed to 'test'"))
+        XCTAssertMatch(warnings, .contains("renamed to 'binary'"))
+    }
+
+    func testLibraryTargetFactoryRemoved() async throws {
+        let content = """
+            import PackageDescription
+            let package = Package(
+                name: "Foo",
+                targets: [
+                    .libraryTarget(name: "Lib"),
+                ]
+            )
+            """
+
+        let observability = ObservabilitySystem.makeForTesting()
+        await XCTAssertAsyncThrowsError(try await loadAndValidateManifest(content, observabilityScope: observability.topScope), "expected error") {
+            if case ManifestParseError.invalidManifestFormat(let error, _, _) = $0 {
+                XCTAssertMatch(error, .contains("libraryTarget"))
+            } else {
+                XCTFail("unexpected error: \($0)")
+            }
+        }
+    }
 }

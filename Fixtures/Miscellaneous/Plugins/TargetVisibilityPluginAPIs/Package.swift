@@ -5,8 +5,8 @@ let package = Package(
     name: "TargetVisibilityPluginAPIs",
     targets: [
         .target(name: "Plain"),
-        .libraryTarget(name: "DynamicLib", type: .dynamic, visibility: .public),
-        .libraryTarget(name: "Aggregate", dependencies: ["Plain"], visibility: .public),
+        .library(name: "DynamicLib", type: .dynamic, visibility: .public),
+        .library(name: "Aggregate", dependencies: ["Plain"], visibility: .public),
         .plugin(
             name: "DumpTargets",
             capability: .command(

@@ -9,20 +9,20 @@ let package = Package(
     targets: [
         .target(name: "StaticLibCore"),
         .target(name: "DynamicLibCore"),
-        .libraryTarget(
+        .library(
             name: "StaticLib",
             type: .static,
             dependencies: ["StaticLibCore"]
         ),
-        .libraryTarget(
+        .library(
             name: "DynamicLib",
             type: .dynamic,
             dependencies: ["DynamicLibCore"]
         ),
-        .libraryTarget(
+        .library(
             name: "AutoLib"
         ),
-        .executableTarget(
+        .executable(
             name: "Tool",
             dependencies: ["StaticLib", "DynamicLib", "AutoLib"]
         ),

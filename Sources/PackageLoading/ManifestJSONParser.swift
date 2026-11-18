@@ -598,8 +598,8 @@ extension PackageConditionDescription {
 }
 
 extension TargetDescription.TargetKind {
-    /// - Parameter libraryType: The linkage declared by a `libraryTarget`, if it declared one.
-    ///   A `libraryTarget` which leaves the choice to the build system becomes `.library(.automatic)`.
+    /// - Parameter libraryType: The linkage declared by a `library` target, if it declared one.
+    ///   A `library` target which leaves the choice to the build system becomes `.library(.automatic)`.
     init(_ type: Serialization.TargetType, libraryType: ProductType.LibraryType?) {
         switch type {
         case .regular:

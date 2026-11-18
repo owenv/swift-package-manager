@@ -23,6 +23,8 @@ Including testing libraries as a dependency to an executable target, as either a
 
 ### Creating a Binary Target
 
+- ``binary(name:path:visibility:)``
+- ``binary(name:url:checksum:visibility:)``
 - ``binaryTarget(name:path:)``
 - ``binaryTarget(name:url:checksum:)``
 - ``url``
@@ -36,9 +38,15 @@ Including testing libraries as a dependency to an executable target, as either a
 
 ### Creating an Executable Target
 
+- ``executable(name:dependencies:path:exclude:sources:resources:publicHeadersPath:packageAccess:cSettings:cxxSettings:swiftSettings:linkerSettings:plugins:visibility:)``
 - ``executableTarget(name:dependencies:path:exclude:sources:resources:publicHeadersPath:packageAccess:cSettings:cxxSettings:swiftSettings:linkerSettings:plugins:)``
 - ``executableTarget(name:dependencies:path:exclude:sources:resources:publicHeadersPath:cSettings:cxxSettings:swiftSettings:linkerSettings:plugins:)``
 - ``executableTarget(name:dependencies:path:exclude:sources:resources:publicHeadersPath:cSettings:cxxSettings:swiftSettings:linkerSettings:)``
+
+### Creating a Library Target
+
+- ``library(name:type:dependencies:path:exclude:sources:resources:publicHeadersPath:packageAccess:cSettings:cxxSettings:swiftSettings:linkerSettings:plugins:visibility:)``
+- ``LibraryType``
 
 ### Creating a Regular Target
 
@@ -50,6 +58,7 @@ Including testing libraries as a dependency to an executable target, as either a
 
 ### Creating a Test Target
 
+- ``test(name:dependencies:path:exclude:sources:resources:publicHeadersPath:packageAccess:cSettings:cxxSettings:swiftSettings:linkerSettings:plugins:visibility:)``
 - ``testTarget(name:dependencies:path:exclude:sources:resources:packageAccess:cSettings:cxxSettings:swiftSettings:linkerSettings:plugins:)``
 - ``testTarget(name:dependencies:path:exclude:sources:resources:cSettings:cxxSettings:swiftSettings:linkerSettings:plugins:)``
 - ``testTarget(name:dependencies:path:exclude:sources:resources:cSettings:cxxSettings:swiftSettings:linkerSettings:)``

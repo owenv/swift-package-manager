@@ -520,7 +520,7 @@ internal struct ConcreteSourceModuleTarget: SourceModuleTarget {
     let visibility: TargetVisibility
 }
 
-/// Used to represent a libraryTarget with no sources. This type is not intended to be public API.
+/// Used to represent a library target with no sources. This type is not intended to be public API.
 internal struct ConcreteLibraryTarget: Target {
     let id: ID
     let name: String

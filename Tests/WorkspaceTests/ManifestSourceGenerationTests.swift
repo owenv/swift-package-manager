@@ -755,6 +755,29 @@ final class ManifestSourceGenerationTests: XCTestCase {
       #endif
     }
 
+    func testTargetFactoryNamesVNext() async throws {
+        let manifestContents = """
+            // swift-tools-version: 999.0
+            import PackageDescription
+            let package = Package(
+                name: "Foo",
+                targets: [
+                    .target(name: "Regular"),
+                    .library(name: "Lib", type: .static, dependencies: ["Regular"], visibility: .public),
+                    .executable(name: "Exe", dependencies: ["Lib"]),
+                    .test(name: "LibTests", dependencies: ["Lib"]),
+                    .binary(name: "Bin", path: "Bin.xcframework"),
+                ]
+            )
+            """
+        let newContents = try await testManifestWritingRoundTrip(manifestContents: manifestContents, toolsVersion: .vNext)
+        XCTAssertMatch(newContents, .contains(".library("))
+        XCTAssertMatch(newContents, .contains(".executable("))
+        XCTAssertMatch(newContents, .contains(".test("))
+        XCTAssertMatch(newContents, .contains(".binary("))
+        XCTAssertNoMatch(newContents, .contains("Target("))
+    }
+
     func testModuleAliasGeneration() async throws {
         try XCTSkipOnWindows(because: "https://github.com/swiftlang/swift-package-manager/issues/10711: spurious duplicate-dependency warning from temp-dir identity collision")
         let manifest = Manifest.createRootManifest(

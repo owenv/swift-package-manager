@@ -7,7 +7,7 @@ let package = Package(
         .package(path: "../UtilsPkg"),
     ],
     targets: [
-        .executableTarget(
+        .executable(
             name: "App",
             dependencies: [
                 .product(name: "Utils", package: "UtilsPkg")

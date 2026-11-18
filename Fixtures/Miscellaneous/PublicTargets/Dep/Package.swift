@@ -5,7 +5,7 @@ let package = Package(
     name: "Dep",
     targets: [
         .target(name: "PublicLibCore"),
-        .libraryTarget(
+        .library(
             name: "PublicLib",
             type: .dynamic,
             dependencies: ["PublicLibCore"],

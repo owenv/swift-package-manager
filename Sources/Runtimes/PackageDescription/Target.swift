@@ -903,7 +903,7 @@ public final class Target {
     ///   - plugins: The plug-ins used by this target
     ///   - visibility: Which packages are allowed to depend on this target.
     @available(_PackageDescription, introduced: 999.0)
-    public static func executableTarget(
+    public static func executable(
         name: String,
         dependencies: [Dependency] = [],
         path: String? = nil,
@@ -964,7 +964,7 @@ public final class Target {
     ///   - plugins: The plug-ins used by this target.
     ///   - visibility: Which packages are allowed to depend on this target.
     @available(_PackageDescription, introduced: 999.0)
-    public static func libraryTarget(
+    public static func library(
         name: String,
         type: LibraryType? = nil,
         dependencies: [Dependency] = [],
@@ -1330,7 +1330,7 @@ public final class Target {
     ///   - plugins: The plug-ins used by this target.
     ///   - visibility: Which packages are allowed to depend on this target.
     @available(_PackageDescription, introduced: 999.0)
-    public static func testTarget(
+    public static func test(
         name: String,
         dependencies: [Dependency] = [],
         path: String? = nil,
@@ -1481,7 +1481,7 @@ public final class Target {
     ///     artifact.
     ///   - visibility: Which packages are allowed to depend on this target.
     @available(_PackageDescription, introduced: 999.0)
-    public static func binaryTarget(
+    public static func binary(
         name: String,
         url: String,
         checksum: String,
@@ -1537,7 +1537,7 @@ public final class Target {
     ///     artifact at its root.
     ///   - visibility: Which packages are allowed to depend on this target.
     @available(_PackageDescription, introduced: 999.0)
-    public static func binaryTarget(
+    public static func binary(
         name: String,
         path: String,
         visibility: TargetVisibility = .package
@@ -1553,7 +1553,108 @@ public final class Target {
             packageAccess: false,
             visibility: visibility)
     }
-    
+
+    /// Creates an executable target.
+    ///
+    /// Deprecated: use ``executable(name:dependencies:path:exclude:sources:resources:publicHeadersPath:packageAccess:cSettings:cxxSettings:swiftSettings:linkerSettings:plugins:visibility:)`` instead.
+    @available(_PackageDescription, introduced: 999.0, deprecated: 999.0, renamed: "executable")
+    public static func executableTarget(
+        name: String,
+        dependencies: [Dependency] = [],
+        path: String? = nil,
+        exclude: [String] = [],
+        sources: [String]? = nil,
+        resources: [Resource]? = nil,
+        publicHeadersPath: String? = nil,
+        packageAccess: Bool = true,
+        cSettings: [CSetting]? = nil,
+        cxxSettings: [CXXSetting]? = nil,
+        swiftSettings: [SwiftSetting]? = nil,
+        linkerSettings: [LinkerSetting]? = nil,
+        plugins: [PluginUsage]? = nil,
+        visibility: TargetVisibility = .package
+    ) -> Target {
+        return .executable(
+            name: name,
+            dependencies: dependencies,
+            path: path,
+            exclude: exclude,
+            sources: sources,
+            resources: resources,
+            publicHeadersPath: publicHeadersPath,
+            packageAccess: packageAccess,
+            cSettings: cSettings,
+            cxxSettings: cxxSettings,
+            swiftSettings: swiftSettings,
+            linkerSettings: linkerSettings,
+            plugins: plugins,
+            visibility: visibility
+        )
+    }
+
+    /// Creates a test target.
+    ///
+    /// Deprecated: use ``test(name:dependencies:path:exclude:sources:resources:publicHeadersPath:packageAccess:cSettings:cxxSettings:swiftSettings:linkerSettings:plugins:visibility:)`` instead.
+    @available(_PackageDescription, introduced: 999.0, deprecated: 999.0, renamed: "test")
+    public static func testTarget(
+        name: String,
+        dependencies: [Dependency] = [],
+        path: String? = nil,
+        exclude: [String] = [],
+        sources: [String]? = nil,
+        resources: [Resource]? = nil,
+        publicHeadersPath: String? = nil,
+        packageAccess: Bool = true,
+        cSettings: [CSetting]? = nil,
+        cxxSettings: [CXXSetting]? = nil,
+        swiftSettings: [SwiftSetting]? = nil,
+        linkerSettings: [LinkerSetting]? = nil,
+        plugins: [PluginUsage]? = nil,
+        visibility: TargetVisibility = .package
+    ) -> Target {
+        return .test(
+            name: name,
+            dependencies: dependencies,
+            path: path,
+            exclude: exclude,
+            sources: sources,
+            resources: resources,
+            publicHeadersPath: publicHeadersPath,
+            packageAccess: packageAccess,
+            cSettings: cSettings,
+            cxxSettings: cxxSettings,
+            swiftSettings: swiftSettings,
+            linkerSettings: linkerSettings,
+            plugins: plugins,
+            visibility: visibility
+        )
+    }
+
+    /// Creates a binary target that references a remote artifact.
+    ///
+    /// Deprecated: use ``binary(name:url:checksum:visibility:)`` instead.
+    @available(_PackageDescription, introduced: 999.0, deprecated: 999.0, renamed: "binary")
+    public static func binaryTarget(
+        name: String,
+        url: String,
+        checksum: String,
+        visibility: TargetVisibility = .package
+    ) -> Target {
+        return .binary(name: name, url: url, checksum: checksum, visibility: visibility)
+    }
+
+    /// Creates a binary target that references an artifact on disk.
+    ///
+    /// Deprecated: use ``binary(name:path:visibility:)`` instead.
+    @available(_PackageDescription, introduced: 999.0, deprecated: 999.0, renamed: "binary")
+    public static func binaryTarget(
+        name: String,
+        path: String,
+        visibility: TargetVisibility = .package
+    ) -> Target {
+        return .binary(name: name, path: path, visibility: visibility)
+    }
+
     /// Defines a new package plugin target.
     ///
     /// A plugin target provides custom build commands to SwiftPM (and to

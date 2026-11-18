@@ -113,7 +113,7 @@ fileprivate extension SourceCodeFragment {
         }
 
         if !manifest.targets.isEmpty {
-            let nodes = manifest.targets.map{ SourceCodeFragment(from: $0) }
+            let nodes = manifest.targets.map{ SourceCodeFragment(from: $0, toolsVersion: toolsVersion) }
             params.append(SourceCodeFragment(key: "targets", subnodes: nodes))
         }
         
@@ -361,7 +361,7 @@ fileprivate extension SourceCodeFragment {
     }
 
     /// Instantiates a SourceCodeFragment to represent a single target.
-    init(from target: TargetDescription) {
+    init(from target: TargetDescription, toolsVersion: ToolsVersion) {
         var params: [SourceCodeFragment] = []
 
         params.append(SourceCodeFragment(key: "name", string: target.name))
@@ -446,23 +446,25 @@ fileprivate extension SourceCodeFragment {
             params.append(SourceCodeFragment(key: "visibility", enum: target.visibility.rawValue))
         }
         
+        // Starting with vNext, the `Target` suffix was dropped from target factory names.
+        let usesShortNames = toolsVersion >= .vNext
         switch target.type {
         case .regular:
             self.init(enum: "target", subnodes: params, multiline: true)
         case .executable:
-            self.init(enum: "executableTarget", subnodes: params, multiline: true)
+            self.init(enum: usesShortNames ? "executable" : "executableTarget", subnodes: params, multiline: true)
         case .test:
-            self.init(enum: "testTarget", subnodes: params, multiline: true)
+            self.init(enum: usesShortNames ? "test" : "testTarget", subnodes: params, multiline: true)
         case .system:
             self.init(enum: "systemLibrary", subnodes: params, multiline: true)
         case .binary:
-            self.init(enum: "binaryTarget", subnodes: params, multiline: true)
+            self.init(enum: usesShortNames ? "binary" : "binaryTarget", subnodes: params, multiline: true)
         case .plugin:
             self.init(enum: "plugin", subnodes: params, multiline: true)
         case .macro:
             self.init(enum: "macro", subnodes: params, multiline: true)
         case .library:
-            self.init(enum: "libraryTarget", subnodes: params, multiline: true)
+            self.init(enum: "library", subnodes: params, multiline: true)
         }
     }
 

@@ -7,7 +7,7 @@ let package = Package(
         .package(path: "../Dep"),
     ],
     targets: [
-        .executableTarget(
+        .executable(
             name: "Tool",
             dependencies: [
                 .target(name: "PackageOnly", package: "Dep"),

@@ -134,7 +134,7 @@ public class Product {
     ///   - targets: The targets that are bundled into a library product.
     ///
     /// - Returns: A `Product` instance.
-    @available(_PackageDescription, deprecated: 999.0, message: "library products are deprecated; declare a 'libraryTarget' with 'visibility: .public' instead")
+    @available(_PackageDescription, deprecated: 999.0, message: "library products are deprecated; declare a 'library' target with 'visibility: .public' instead")
     public static func library(
         name: String,
         type: Library.LibraryType? = nil,
@@ -149,7 +149,7 @@ public class Product {
     ///   - name: The name of the executable product.
     ///   - targets: The targets to bundle into an executable product.
     /// - Returns: A `Product` instance.
-    @available(_PackageDescription, deprecated: 999.0, message: "executable products are deprecated; declare an 'executableTarget' with 'visibility: .public' instead")
+    @available(_PackageDescription, deprecated: 999.0, message: "executable products are deprecated; declare an 'executable' target with 'visibility: .public' instead")
     public static func executable(
         name: String,
         targets: [String]
@@ -157,7 +157,7 @@ public class Product {
         return Executable(name: name, targets: targets, settings: [])
     }
 
-    @available(_PackageDescription, deprecated: 999.0, message: "executable products are deprecated; declare an 'executableTarget' with 'visibility: .public' instead")
+    @available(_PackageDescription, deprecated: 999.0, message: "executable products are deprecated; declare an 'executable' target with 'visibility: .public' instead")
     @_spi(PackageProductSettings)
     public static func executable(
         name: String,
